@@ -1,0 +1,36 @@
+name: CI for OrderProcessing
+
+on:
+  push:
+    branches: [ main, development, feature/* ]
+  pull_request:
+    branches: [ main, development ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x' # Matches your TargetFramework
+
+    - name: Restore dependencies
+      run: dotnet restore OrderProcessing/OrderProcessing.csproj
+      working-directory: .
+
+    - name: Restore test dependencies
+      run: dotnet restore OrderProcessing.Tests/OrderProcessing.Tests.csproj
+      working-directory: .
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+      working-directory: .
+
+    - name: Run tests
+      run: dotnet test --no-build --verbosity normal
+      working-directory: .

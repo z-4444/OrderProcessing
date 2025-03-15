@@ -31,7 +31,7 @@ namespace OrderProcessing.Tests
             var order = new Order { Amount = 100, CustomerType = "Loyal" };
 
             // Act
-            var result = controller.Process(order);
+            var result = controller.Result(order);
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
@@ -49,7 +49,7 @@ namespace OrderProcessing.Tests
             var order = new Order { CustomerType = "New" };
 
             // Act
-            var result = controller.Process(order);
+            var result = controller.Result(order);
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
