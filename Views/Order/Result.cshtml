@@ -1,0 +1,13 @@
+﻿@model OrderProcessing.Models.Order
+@{
+    ViewData["Title"] = "Order Summary";
+}
+
+<h2>Order Summary</h2>
+
+<div>
+    <p><strong>Original Amount:</strong> $@Model.Amount</p>
+    <p><strong>Discount:</strong> $@Model.Discount</p>
+    <p><strong>Final Total:</strong> $@Model.FinalTotal</p>
+    <a asp-action="Index" class="btn btn-secondary">New Order</a>
+</div>
