@@ -86,10 +86,10 @@ Check workflow runs at GitHub Actions.
 ### Usage
 Place an Order:
 Go to /Order/Index.
-Enter an order amount (1–10,000) and select a type (Standard or Express).
+Enter an order amount (1–10,000) and select a type (New or Loyal).
 Click “Calculate & View Result”.
 View Result:
-See the order summary with calculated total (e.g., 5% fee for Standard, 10% for Express).
+See the order summary with calculated total (e.g., 10% for Loyal).
 Explore:
 Visit /Home/Index for a welcome page or /Home/Privacy for a privacy note.
 
