@@ -50,24 +50,28 @@ Restore dependencies:
 dotnet restore OrderProcessingSolution.sln
 
 Build the projects:
-```bash
+```
 dotnet build OrderProcessingSolution.sln --configuration Release
+```
 
 Run the Application
 Navigate to the main project:
 ```bash
 cd OrderProcessing
+```
 
 Run the app:
 ```bash
 dotnet run
+```
 
 Open a browser and visit https://localhost:5001/Order/Index (port may vary—check console output).
 
 ### Run Tests
 From the root directory:
-```bash
+```
 dotnet test OrderProcessingSolution.sln
+```
 
 Or in Visual Studio:
 Open OrderProcessingSolution.sln.
