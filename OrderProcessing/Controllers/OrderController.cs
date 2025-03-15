@@ -12,7 +12,7 @@ namespace OrderProcessing.Controllers
         }
 
         [HttpPost]
-        public IActionResult Process(Order order)
+        public IActionResult Result(Order order)
         {
             if (!ModelState.IsValid)
                 return View("Index", order);
