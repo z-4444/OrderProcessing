@@ -1,36 +1,36 @@
-name: CI for OrderProcessing
+name: CI - Build and Test
 
 on:
   push:
-    branches: [ main, development, feature/* ]
+    branches: [main, development, feature/*] # Runs on push to these branches
   pull_request:
-    branches: [ main, development ]
+    branches: [main, development]  # Runs on PRs to these branches
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '8.0.x' # Matches your TargetFramework
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'  # Match your project version
 
-    - name: Restore dependencies
-      run: dotnet restore OrderProcessing/OrderProcessing.csproj
-      working-directory: .
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Restore test dependencies
-      run: dotnet restore OrderProcessing.Tests/OrderProcessing.Tests.csproj
-      working-directory: .
+      - name: Build solution
+        run: dotnet build --no-restore --configuration Release
 
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-      working-directory: .
+      - name: Run tests
+        run: dotnet test OrderProcessing.Tests/OrderProcessing.Tests.csproj --no-build --configuration Release --logger trx --results-directory TestResults
 
-    - name: Run tests
-      run: dotnet test --no-build --verbosity normal
-      working-directory: .
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: TestResults
+          path: TestResults/
