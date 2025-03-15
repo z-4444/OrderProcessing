@@ -1,27 +1,32 @@
 ﻿@model OrderProcessing.Models.Order
+
 @{
-    ViewData["Title"] = "Order Entry";
+    ViewData["Title"] = "Place an Order";
 }
 
-<h2>Enter Your Order</h2>
+<h2 class="text-center mb-4">Place Your Order</h2>
 
-<form asp-action="Process" method="post">
-    <div class="form-group">
-        <label asp-for="Amount">Order Amount:</label>
-        <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0" required />
-        <span asp-validation-for="Amount" class="text-danger"></span>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form asp-action="Result" method="post" class="p-4 border rounded shadow-sm bg-light">
+            <div class="form-group mb-3">
+                <label asp-for="Amount" class="form-label">Order Amount</label>
+                <input asp-for="Amount" class="form-control" placeholder="Enter amount" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="CustomerType" class="form-label">Order Type</label>
+                <select asp-for="CustomerType" class="form-select">
+                    <option value="">-- Select Type --</option>
+                    <option value="New">New</option>
+                    <option value="Loyal">Loyal</option>
+                </select>
+                <span asp-validation-for="CustomerType" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Calculate & View Result</button>
+        </form>
     </div>
-    <div class="form-group">
-        <label asp-for="CustomerType">Customer Type:</label>
-        <select asp-for="CustomerType" class="form-control" required>
-            <option value="">Select...</option>
-            <option value="New">New</option>
-            <option value="Loyal">Loyal</option>
-        </select>
-        <span asp-validation-for="CustomerType" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Calculate</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
