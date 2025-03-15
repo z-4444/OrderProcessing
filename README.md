@@ -12,8 +12,8 @@ The **Order Processing Application** is a simple ASP.NET Core MVC web app design
 - **CI/CD**: GitHub Actions pipeline to build and test on every push/PR.
 
 ### Project Structure
-
-zahid/
+```
+OrderProcessing/
 ├── OrderProcessing/              # Main ASP.NET Core MVC project
 │   ├── Controllers/             # Contains OrderController.cs
 │   ├── Models/                  # Contains Order.cs
@@ -28,9 +28,7 @@ zahid/
 ├── OrderProcessingSolution.sln   # Solution file linking both projects
 ├── .gitignore                    # Ignores build artifacts
 └── README.md                     # This file
-
-
----
+```
 
 ## Setup Instructions
 
@@ -48,22 +46,29 @@ zahid/
 
 Build the Solution
 Restore dependencies:
+```bash
 dotnet restore OrderProcessingSolution.sln
 
 Build the projects:
-
+```bash
 dotnet build OrderProcessingSolution.sln --configuration Release
 
 Run the Application
 Navigate to the main project:
+```bash
 cd OrderProcessing
+
 Run the app:
+```bash
 dotnet run
+
 Open a browser and visit https://localhost:5001/Order/Index (port may vary—check console output).
 
-Run Tests
+### Run Tests
 From the root directory:
+```bash
 dotnet test OrderProcessingSolution.sln
+
 Or in Visual Studio:
 Open OrderProcessingSolution.sln.
 Go to Test > Test Explorer > Run All Tests.
@@ -74,7 +79,7 @@ Builds the solution (OrderProcessingSolution.sln).
 Runs all xUnit tests.
 Check workflow runs at GitHub Actions.
 
-Usage
+### Usage
 Place an Order:
 Go to /Order/Index.
 Enter an order amount (1–10,000) and select a type (Standard or Express).
@@ -84,8 +89,8 @@ See the order summary with calculated total (e.g., 5% fee for Standard, 10% for 
 Explore:
 Visit /Home/Index for a welcome page or /Home/Privacy for a privacy note.
 
-Contributing
+### Contributing
 This is an assignment project by Muhammad Zahid (z-4444). Feel free to fork and submit pull requests for enhancements!
 
-License
+### License
 For educational purposes only. No formal license applied.
