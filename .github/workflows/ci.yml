@@ -2,9 +2,9 @@ name: CI for OrderProcessing
 
 on:
   push:
-    branches: [ main, development, feature/* ]
+    branches: [ main, development, feature/*, new_implementation ]
   pull_request:
-    branches: [ main, development ]
+    branches: [ main, development, new_implementation ]
 
 jobs:
   build-and-test:
@@ -20,13 +20,10 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore OrderProcessingSolution.sln
-      continue-on-error: false
+      run: dotnet restore OrderProcessing.sln
 
     - name: Build
-      run: dotnet build OrderProcessingSolution.sln --no-restore --configuration Release
-      continue-on-error: false
+      run: dotnet build OrderProcessing.sln --no-restore --configuration Release
 
     - name: Run tests
-      run: dotnet test OrderProcessingSolution.sln --no-build --verbosity normal
-      continue-on-error: false
+      run: dotnet test OrderProcessing.sln --no-build --configuration Release --verbosity normal

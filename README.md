@@ -14,21 +14,20 @@ The **Order Processing Application** is a simple ASP.NET Core MVC web app design
 ### Project Structure
 ```
 OrderProcessing/
-├── OrderProcessing/              # Main ASP.NET Core MVC project
-│   ├── Controllers/             # Contains OrderController.cs
-│   ├── Models/                  # Contains Order.cs
-│   ├── Views/                   # Contains Order views and _Layout.cshtml
-│   ├── wwwroot/                 # Static files (CSS, JS)
-│   └── OrderProcessing.csproj
-├── OrderProcessing.Tests/        # xUnit test project
-│   ├── OrderTests.cs            # Tests for OrderController
-│   └── OrderProcessing.Tests.csproj
-├── .github/workflows/            # CI/CD configuration
-│   └── ci.yml                   # GitHub Actions workflow
-├── OrderProcessingSolution.sln   # Solution file linking both projects
-├── .gitignore                    # Ignores build artifacts
-└── README.md                     # This file
+├── src/
+│   └── OrderProcessing.Domain/   # Domain model (orders, pricing, inventory rules)
+├── tests/
+│   └── OrderProcessing.UnitTests/ # Domain unit tests
+├── OrderProcessing/                # Temporary MVC host (legacy UI, still runnable)
+├── OrderProcessing.Tests/          # Legacy MVC controller tests
+├── .github/workflows/
+│   └── ci.yml
+├── OrderProcessing.sln             # Root solution file
+├── .gitignore
+└── README.md
 ```
+
+> **Note:** The repository is being migrated incrementally. The MVC project under `OrderProcessing/` remains the temporary runnable host while the new domain layer is introduced under `src/`. The final API and Angular frontend will be added in later milestones.
 
 ## Setup Instructions
 
@@ -47,11 +46,11 @@ OrderProcessing/
 Build the Solution
 Restore dependencies:
 ```bash
-dotnet restore OrderProcessingSolution.sln
+dotnet restore OrderProcessing.sln
 
 Build the projects:
 ```
-dotnet build OrderProcessingSolution.sln --configuration Release
+dotnet build OrderProcessing.sln --configuration Release
 ```
 
 Run the Application
@@ -70,7 +69,7 @@ Open a browser and visit https://localhost:5001/Order/Index (port may vary—che
 ### Run Tests
 From the root directory:
 ```
-dotnet test OrderProcessingSolution.sln
+dotnet test OrderProcessing.sln
 ```
 
 Or in Visual Studio:
