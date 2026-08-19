@@ -6,7 +6,12 @@ namespace OrderProcessing.Domain.Orders;
 
 public sealed class OrderItem
 {
+    private OrderItem()
+    {
+    }
+
     private OrderItem(
+        Guid id,
         Guid productId,
         Sku sku,
         string productName,
@@ -15,6 +20,7 @@ public sealed class OrderItem
         Money discount,
         Money lineTotal)
     {
+        Id = id;
         ProductId = productId;
         Sku = sku;
         ProductName = productName;
@@ -23,6 +29,8 @@ public sealed class OrderItem
         Discount = discount;
         LineTotal = lineTotal;
     }
+
+    public Guid Id { get; }
 
     public Guid ProductId { get; }
 
@@ -72,6 +80,7 @@ public sealed class OrderItem
         var lineTotal = gross.Subtract(lineDiscount);
 
         return new OrderItem(
+            Guid.NewGuid(),
             productId,
             sku,
             productName.Trim(),
