@@ -15,15 +15,16 @@ The **Order Processing Application** is a simple ASP.NET Core MVC web app design
 ```
 OrderProcessing/
 ├── src/
-│   └── OrderProcessing.Domain/   # Domain model (orders, pricing, inventory rules)
+│   ├── OrderProcessing.Domain/          # Domain model
+│   └── OrderProcessing.Infrastructure/  # EF Core + SQL Server persistence
 ├── tests/
-│   └── OrderProcessing.UnitTests/ # Domain unit tests
-├── OrderProcessing/                # Temporary MVC host (legacy UI, still runnable)
-├── OrderProcessing.Tests/          # Legacy MVC controller tests
-├── .github/workflows/
-│   └── ci.yml
-├── OrderProcessing.sln             # Root solution file
-├── .gitignore
+│   ├── OrderProcessing.UnitTests/
+│   └── OrderProcessing.IntegrationTests/ # SQL Server / Testcontainers tests
+├── OrderProcessing/                       # Temporary MVC host
+├── OrderProcessing.Tests/                 # Legacy MVC controller tests
+├── docker-compose.yml                     # Local SQL Server
+├── .env.example
+├── OrderProcessing.sln
 └── README.md
 ```
 
@@ -65,6 +66,26 @@ dotnet run
 ```
 
 Open a browser and visit https://localhost:5001/Order/Index (port may vary—check console output).
+
+### Local SQL Server (Docker)
+
+SQL Server password must include uppercase, lowercase, a number, and a symbol.
+
+```bash
+cp .env.example .env
+docker compose up -d
+docker compose ps
+```
+
+Apply migrations (does not run automatically on app startup):
+
+```bash
+dotnet ef database update --project src/OrderProcessing.Infrastructure --startup-project src/OrderProcessing.Infrastructure
+```
+
+Optional development seed (off by default): set `Database:SeedOnStartup` to `true` in `appsettings.Development.json`, then `dotnet run --project OrderProcessing`.
+
+Integration tests require Docker and start an isolated SQL Server container via Testcontainers.
 
 ### Run Tests
 From the root directory:

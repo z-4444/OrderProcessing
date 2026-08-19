@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\src\OrderProcessing.Infrastructure\OrderProcessing.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

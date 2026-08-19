@@ -1,9 +1,20 @@
+using OrderProcessing.Infrastructure;
+using OrderProcessing.Infrastructure.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment()
+    && app.Configuration.GetValue("Database:SeedOnStartup", false))
+{
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>();
+    await seeder.SeedAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

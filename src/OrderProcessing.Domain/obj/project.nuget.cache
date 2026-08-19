@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "1PBEM1jJ7uM=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Domain\\OrderProcessing.Domain.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\153650892263712293503196719cf8fa\\nuget\\microsoft.netcore.app.ref\\8.0.28\\microsoft.netcore.app.ref.8.0.28.nupkg.sha512",
+    "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\153650892263712293503196719cf8fa\\nuget\\microsoft.windowsdesktop.app.ref\\8.0.28\\microsoft.windowsdesktop.app.ref.8.0.28.nupkg.sha512",
+    "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\153650892263712293503196719cf8fa\\nuget\\microsoft.aspnetcore.app.ref\\8.0.28\\microsoft.aspnetcore.app.ref.8.0.28.nupkg.sha512"
+  ],
+  "logs": []
+}

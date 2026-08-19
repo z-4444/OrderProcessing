@@ -4,6 +4,10 @@ namespace OrderProcessing.Domain.Inventory;
 
 public sealed class InventoryItem
 {
+    private InventoryItem()
+    {
+    }
+
     public InventoryItem(Guid productId, int quantityOnHand)
     {
         if (productId == Guid.Empty)
