@@ -10,6 +10,10 @@ public sealed class Order
 {
     private readonly List<OrderItem> _items = [];
 
+    private Order()
+    {
+    }
+
     private Order(
         Guid id,
         OrderNumber orderNumber,
