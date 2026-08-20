@@ -78,4 +78,32 @@ public sealed class Product
             createdAt,
             createdAt);
     }
+
+    public void Update(
+        string name,
+        Money unitPrice,
+        DateTimeOffset updatedAt,
+        string? description = null,
+        bool? isActive = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new DomainException("Product name is required.");
+        }
+
+        if (unitPrice.Amount <= 0)
+        {
+            throw new DomainException("Product unit price must be greater than zero.");
+        }
+
+        Name = name.Trim();
+        Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+        UnitPrice = unitPrice;
+        if (isActive.HasValue)
+        {
+            IsActive = isActive.Value;
+        }
+
+        UpdatedAt = updatedAt;
+    }
 }

@@ -15,12 +15,14 @@ The **Order Processing Application** is a simple ASP.NET Core MVC web app design
 ```
 OrderProcessing/
 ├── src/
+│   ├── OrderProcessing.Api/             # ASP.NET Core Web API (primary host)
+│   ├── OrderProcessing.Application/     # Use cases, DTOs, validation
 │   ├── OrderProcessing.Domain/          # Domain model
-│   └── OrderProcessing.Infrastructure/  # EF Core + SQL Server persistence
+│   └── OrderProcessing.Infrastructure/  # EF Core + Identity + SQL Server
 ├── tests/
 │   ├── OrderProcessing.UnitTests/
 │   └── OrderProcessing.IntegrationTests/ # SQL Server / Testcontainers tests
-├── OrderProcessing/                       # Temporary MVC host
+├── OrderProcessing/                       # Temporary MVC host (legacy)
 ├── OrderProcessing.Tests/                 # Legacy MVC controller tests
 ├── docker-compose.yml                     # Local SQL Server
 ├── .env.example
@@ -28,7 +30,7 @@ OrderProcessing/
 └── README.md
 ```
 
-> **Note:** The repository is being migrated incrementally. The MVC project under `OrderProcessing/` remains the temporary runnable host while the new domain layer is introduced under `src/`. The final API and Angular frontend will be added in later milestones.
+> **Note:** The Web API under `src/OrderProcessing.Api` is now the primary host. The MVC project remains temporarily for compatibility and will be removed after Angular is introduced.
 
 ## Setup Instructions
 
@@ -80,10 +82,27 @@ docker compose ps
 Apply migrations (does not run automatically on app startup):
 
 ```bash
-dotnet ef database update --project src/OrderProcessing.Infrastructure --startup-project src/OrderProcessing.Infrastructure
+dotnet ef database update --project src/OrderProcessing.Infrastructure --startup-project src/OrderProcessing.Api
 ```
 
-Optional development seed (off by default): set `Database:SeedOnStartup` to `true` in `appsettings.Development.json`, then `dotnet run --project OrderProcessing`.
+### Run the API
+
+Copy `src/OrderProcessing.Api/appsettings.Development.example.json` to `appsettings.Development.json` (already present locally) and set:
+
+- `Jwt:Key` — at least 32 characters
+- `SeedAdmin:Password` — Identity-compliant password (do not commit production secrets)
+
+Then:
+
+```bash
+dotnet run --project src/OrderProcessing.Api
+```
+
+Open Swagger at `/swagger`. Login with `POST /api/auth/login`, click **Authorize**, and paste `Bearer {token}`.
+
+Refresh tokens are intentionally not implemented in this milestone; access tokens are short-lived JWTs.
+
+The legacy MVC project remains in the solution but is no longer the primary host.
 
 Integration tests require Docker and start an isolated SQL Server container via Testcontainers.
 

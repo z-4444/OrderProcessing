@@ -64,7 +64,9 @@ internal sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasForeignKey("OrderId")
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Navigation("_items").UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation("_items")
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .AutoInclude();
 
         builder.Ignore(order => order.Items);
         builder.Ignore(order => order.CanCancel);

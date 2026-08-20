@@ -5524,7 +5524,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\153650892263712293503196719cf8fa\\nuget": {},
+    "C:\\Users\\mzahi\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
@@ -5533,7 +5533,7 @@
       "projectUniqueName": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\tests\\OrderProcessing.UnitTests\\OrderProcessing.UnitTests.csproj",
       "projectName": "OrderProcessing.UnitTests",
       "projectPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\tests\\OrderProcessing.UnitTests\\OrderProcessing.UnitTests.csproj",
-      "packagesPath": "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\153650892263712293503196719cf8fa\\nuget",
+      "packagesPath": "C:\\Users\\mzahi\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\tests\\OrderProcessing.UnitTests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [

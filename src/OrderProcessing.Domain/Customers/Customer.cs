@@ -83,4 +83,36 @@ public sealed class Customer
             createdAt,
             createdAt);
     }
+
+    public void Update(
+        string name,
+        string email,
+        CustomerSegment segment,
+        CustomerStatus status,
+        DateTimeOffset updatedAt,
+        string? phone = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new DomainException("Customer name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new DomainException("Customer email is required.");
+        }
+
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        if (!normalizedEmail.Contains('@'))
+        {
+            throw new DomainException("Customer email is invalid.");
+        }
+
+        Name = name.Trim();
+        Email = normalizedEmail;
+        Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim();
+        Segment = segment;
+        Status = status;
+        UpdatedAt = updatedAt;
+    }
 }

@@ -139,6 +139,13 @@ public sealed class Order
         TouchUpdatedAt();
     }
 
+    public void ClearItems()
+    {
+        EnsureDraft("clear items on");
+        _items.Clear();
+        TouchUpdatedAt();
+    }
+
     public void UpdateNotes(string? notes)
     {
         EnsureDraft("update notes on");

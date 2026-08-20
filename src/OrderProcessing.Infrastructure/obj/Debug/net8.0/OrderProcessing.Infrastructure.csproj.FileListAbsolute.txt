@@ -16,3 +16,5 @@ C:\Users\mzahi\Documents\other\Project\order-processing\OrderProcessing\src\Orde
 C:\Users\mzahi\Documents\other\Project\order-processing\OrderProcessing\src\OrderProcessing.Infrastructure\obj\Debug\net8.0\OrderProcessing.Infrastructure.pdb
 C:\Users\mzahi\Documents\other\Project\order-processing\OrderProcessing\src\OrderProcessing.Infrastructure\obj\Debug\net8.0\OrderProcessing.Infrastructure.genruntimeconfig.cache
 C:\Users\mzahi\Documents\other\Project\order-processing\OrderProcessing\src\OrderProcessing.Infrastructure\obj\Debug\net8.0\ref\OrderProcessing.Infrastructure.dll
+C:\Users\mzahi\Documents\other\Project\order-processing\OrderProcessing\src\OrderProcessing.Infrastructure\bin\Debug\net8.0\OrderProcessing.Application.dll
+C:\Users\mzahi\Documents\other\Project\order-processing\OrderProcessing\src\OrderProcessing.Infrastructure\bin\Debug\net8.0\OrderProcessing.Application.pdb
