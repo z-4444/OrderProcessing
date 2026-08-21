@@ -25,11 +25,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Jwt:Audience", "OrderProcessingTests");
         builder.UseSetting("Jwt:Key", "TEST_ONLY_jwt_signing_key_32chars!!");
         builder.UseSetting("Jwt:AccessTokenMinutes", "60");
+        builder.UseSetting("Jwt:RefreshTokenDays", "7");
         builder.UseSetting("SeedAdmin:Email", "admin@localhost");
         builder.UseSetting("SeedAdmin:Password", "Admin_Pass_123!");
         builder.UseSetting("Cors:AllowedOrigins:0", "http://localhost:4200");
         builder.UseSetting("Pricing:Currency", "USD");
         builder.UseSetting("Pricing:TaxRate", "0.08");
+        builder.UseSetting("Messaging:Enabled", "false");
         builder.ConfigureTestServices(services => { });
     }
 

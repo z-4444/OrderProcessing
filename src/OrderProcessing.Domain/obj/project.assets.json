@@ -8,7 +8,7 @@
     "net8.0": []
   },
   "packageFolders": {
-    "C:\\Users\\mzahi\\.nuget\\packages\\": {},
+    "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\7c38d8ff9d5c7d25c34ee30d249c6462\\nuget": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
@@ -17,7 +17,7 @@
       "projectUniqueName": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Domain\\OrderProcessing.Domain.csproj",
       "projectName": "OrderProcessing.Domain",
       "projectPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Domain\\OrderProcessing.Domain.csproj",
-      "packagesPath": "C:\\Users\\mzahi\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\7c38d8ff9d5c7d25c34ee30d249c6462\\nuget",
       "outputPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [

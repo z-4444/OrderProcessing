@@ -24,6 +24,18 @@ internal sealed class IdentityService : IIdentityService
         return new AuthenticatedUser(user.Id, user.Email ?? email, user.DisplayName, user.IsActive, roles.ToList());
     }
 
+    public async Task<AuthenticatedUser?> FindByIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return null;
+        }
+
+        var roles = await _userManager.GetRolesAsync(user);
+        return new AuthenticatedUser(user.Id, user.Email ?? string.Empty, user.DisplayName, user.IsActive, roles.ToList());
+    }
+
     public async Task<bool> CheckPasswordAsync(Guid userId, string password, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());

@@ -51,7 +51,15 @@ public static class AuthorizationExtensions
             options.AddPolicy(Policies.OrdersRead, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Sales, Roles.Warehouse));
             options.AddPolicy(Policies.OrdersCreate, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Sales));
             options.AddPolicy(Policies.OrdersEdit, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Sales));
+            options.AddPolicy(Policies.OrdersSubmit, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Sales));
+            options.AddPolicy(Policies.OrdersConfirm, policy => policy.RequireRole(Roles.Admin, Roles.Manager));
+            options.AddPolicy(Policies.OrdersProcess, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Warehouse));
+            options.AddPolicy(Policies.OrdersShip, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Warehouse));
+            options.AddPolicy(Policies.OrdersComplete, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Warehouse));
+            options.AddPolicy(Policies.OrdersCancel, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Sales));
+            options.AddPolicy(Policies.OrdersFail, policy => policy.RequireRole(Roles.Admin, Roles.Manager));
             options.AddPolicy(Policies.InventoryRead, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Warehouse));
+            options.AddPolicy(Policies.InventoryAdjust, policy => policy.RequireRole(Roles.Admin, Roles.Manager, Roles.Warehouse));
         });
 
         services.AddHttpContextAccessor();

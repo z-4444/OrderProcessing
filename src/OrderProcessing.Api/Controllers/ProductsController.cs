@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OrderProcessing.Application.Abstractions;
 using OrderProcessing.Application.Common;
 using OrderProcessing.Application.Products;
 
@@ -31,10 +32,9 @@ public sealed class ProductsController : ControllerBase
     [Authorize(Policy = Policies.ProductsRead)]
     [ProducesResponseType(typeof(PagedResult<ProductResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<ProductResponse>>> List(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20,
+        [FromQuery] ProductListQuery query,
         CancellationToken cancellationToken = default) =>
-        Ok(await _listProducts.Handle(page, pageSize, cancellationToken));
+        Ok(await _listProducts.Handle(query, cancellationToken));
 
     [HttpGet("{id:guid}")]
     [Authorize(Policy = Policies.ProductsRead)]

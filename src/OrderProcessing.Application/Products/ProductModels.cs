@@ -3,7 +3,13 @@ using OrderProcessing.Domain.Products;
 
 namespace OrderProcessing.Application.Products;
 
-public sealed record CreateProductRequest(string Sku, string Name, decimal UnitPrice, string? Description, string Currency = "USD");
+public sealed record CreateProductRequest(
+    string Sku,
+    string Name,
+    decimal UnitPrice,
+    string? Description,
+    string Currency = "USD",
+    int InitialQuantity = 0);
 
 public sealed record UpdateProductRequest(string Name, decimal UnitPrice, bool IsActive, string? Description, string Currency = "USD");
 
@@ -42,6 +48,7 @@ public sealed class CreateProductRequestValidator : AbstractValidator<CreateProd
         RuleFor(request => request.Description).MaximumLength(2000);
         RuleFor(request => request.UnitPrice).GreaterThan(0);
         RuleFor(request => request.Currency).NotEmpty().Length(3);
+        RuleFor(request => request.InitialQuantity).GreaterThanOrEqualTo(0);
     }
 }
 

@@ -19,7 +19,15 @@ public static class Policies
     public const string OrdersRead = "OrdersRead";
     public const string OrdersCreate = "OrdersCreate";
     public const string OrdersEdit = "OrdersEdit";
+    public const string OrdersSubmit = "OrdersSubmit";
+    public const string OrdersConfirm = "OrdersConfirm";
+    public const string OrdersProcess = "OrdersProcess";
+    public const string OrdersShip = "OrdersShip";
+    public const string OrdersComplete = "OrdersComplete";
+    public const string OrdersCancel = "OrdersCancel";
+    public const string OrdersFail = "OrdersFail";
     public const string InventoryRead = "InventoryRead";
+    public const string InventoryAdjust = "InventoryAdjust";
 }
 
 public sealed class PricingOptions
@@ -32,3 +40,13 @@ public sealed class PricingOptions
 }
 
 public sealed record PagedResult<T>(IReadOnlyList<T> Items, int Page, int PageSize, int TotalCount);
+
+public static class Paging
+{
+    public static (int Page, int PageSize) Normalize(int page, int pageSize)
+    {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
+        return (page, pageSize);
+    }
+}

@@ -206,12 +206,10 @@ public sealed class ListOrders
         _orders = orders;
     }
 
-    public async Task<PagedResult<OrderResponse>> Handle(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<OrderResponse>> Handle(OrderListQuery query, CancellationToken cancellationToken = default)
     {
-        page = page < 1 ? 1 : page;
-        pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
-
-        var result = await _orders.ListAsync(page, pageSize, cancellationToken);
+        var (page, pageSize) = Paging.Normalize(query.Page, query.PageSize);
+        var result = await _orders.ListAsync(query with { Page = page, PageSize = pageSize }, cancellationToken);
         return new PagedResult<OrderResponse>(
             result.Items.Select(item => item.ToResponse()).ToList(),
             result.Page,

@@ -10,7 +10,7 @@
         "projectUniqueName": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Application\\OrderProcessing.Application.csproj",
         "projectName": "OrderProcessing.Application",
         "projectPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Application\\OrderProcessing.Application.csproj",
-        "packagesPath": "C:\\Users\\mzahi\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\7c38d8ff9d5c7d25c34ee30d249c6462\\nuget",
         "outputPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
@@ -118,7 +118,7 @@
         "projectUniqueName": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Domain\\OrderProcessing.Domain.csproj",
         "projectName": "OrderProcessing.Domain",
         "projectPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Domain\\OrderProcessing.Domain.csproj",
-        "packagesPath": "C:\\Users\\mzahi\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\7c38d8ff9d5c7d25c34ee30d249c6462\\nuget",
         "outputPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
@@ -200,7 +200,7 @@
         "projectUniqueName": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Infrastructure\\OrderProcessing.Infrastructure.csproj",
         "projectName": "OrderProcessing.Infrastructure",
         "projectPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Infrastructure\\OrderProcessing.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\mzahi\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\mzahi\\AppData\\Local\\Temp\\cursor-sandbox-cache\\7c38d8ff9d5c7d25c34ee30d249c6462\\nuget",
         "outputPath": "C:\\Users\\mzahi\\Documents\\other\\Project\\order-processing\\OrderProcessing\\src\\OrderProcessing.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
@@ -281,6 +281,10 @@
             "Microsoft.IdentityModel.Tokens": {
               "target": "Package",
               "version": "[7.1.2, )"
+            },
+            "RabbitMQ.Client": {
+              "target": "Package",
+              "version": "[6.8.1, )"
             },
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",
