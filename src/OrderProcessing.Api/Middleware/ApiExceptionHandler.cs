@@ -25,6 +25,8 @@ public sealed class ApiExceptionHandler : IExceptionHandler
         var (status, title) = exception switch
         {
             ValidationException => (StatusCodes.Status400BadRequest, "Validation failed"),
+            InsufficientInventoryException => (StatusCodes.Status409Conflict, "Insufficient inventory"),
+            InvalidOrderTransitionException => (StatusCodes.Status409Conflict, "Invalid order transition"),
             DomainException => (StatusCodes.Status400BadRequest, "Business rule violated"),
             NotFoundException => (StatusCodes.Status404NotFound, "Resource not found"),
             ConflictException => (StatusCodes.Status409Conflict, "Conflict"),
@@ -36,6 +38,13 @@ public sealed class ApiExceptionHandler : IExceptionHandler
         {
             _logger.LogError(exception, "Unhandled exception");
         }
+        else
+        {
+            _logger.LogWarning(exception, "Handled exception {StatusCode}", status);
+        }
+
+        var correlationId = httpContext.Response.Headers["X-Correlation-Id"].FirstOrDefault()
+            ?? httpContext.TraceIdentifier;
 
         var problem = new ProblemDetails
         {
@@ -46,6 +55,7 @@ public sealed class ApiExceptionHandler : IExceptionHandler
                 ? "An unexpected error occurred."
                 : exception.Message
         };
+        problem.Extensions["correlationId"] = correlationId;
 
         if (exception is ValidationException validationException)
         {
@@ -61,6 +71,7 @@ public sealed class ApiExceptionHandler : IExceptionHandler
                 Title = title,
                 Type = problem.Type
             };
+            validationProblem.Extensions["correlationId"] = correlationId;
 
             httpContext.Response.StatusCode = status;
             await httpContext.Response.WriteAsJsonAsync(validationProblem, cancellationToken);

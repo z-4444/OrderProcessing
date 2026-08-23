@@ -17,6 +17,7 @@ public sealed class CreateOrder
     private readonly IOrderStore _orders;
     private readonly IOrderNumberGenerator _orderNumbers;
     private readonly IApplicationPersistence _persistence;
+    private readonly IConcurrencyTokenService _concurrency;
     private readonly OrderPricingCalculator _pricingCalculator;
     private readonly PricingOptions _pricing;
     private readonly IValidator<CreateOrderRequest> _validator;
@@ -27,6 +28,7 @@ public sealed class CreateOrder
         IOrderStore orders,
         IOrderNumberGenerator orderNumbers,
         IApplicationPersistence persistence,
+        IConcurrencyTokenService concurrency,
         OrderPricingCalculator pricingCalculator,
         IOptions<PricingOptions> pricing,
         IValidator<CreateOrderRequest> validator)
@@ -36,6 +38,7 @@ public sealed class CreateOrder
         _orders = orders;
         _orderNumbers = orderNumbers;
         _persistence = persistence;
+        _concurrency = concurrency;
         _pricingCalculator = pricingCalculator;
         _pricing = pricing.Value;
         _validator = validator;
@@ -69,7 +72,7 @@ public sealed class CreateOrder
 
         _orders.Add(order);
         await _persistence.SaveChangesAsync(cancellationToken);
-        return order.ToResponse();
+        return order.ToResponse(_concurrency.GetToken(order));
     }
 
     private async Task<IReadOnlyDictionary<Guid, Product>> LoadProducts(
@@ -116,6 +119,7 @@ public sealed class UpdateDraftOrder
     private readonly IProductStore _products;
     private readonly IOrderStore _orders;
     private readonly IApplicationPersistence _persistence;
+    private readonly IConcurrencyTokenService _concurrency;
     private readonly OrderPricingCalculator _pricingCalculator;
     private readonly IValidator<UpdateDraftOrderRequest> _validator;
 
@@ -123,17 +127,23 @@ public sealed class UpdateDraftOrder
         IProductStore products,
         IOrderStore orders,
         IApplicationPersistence persistence,
+        IConcurrencyTokenService concurrency,
         OrderPricingCalculator pricingCalculator,
         IValidator<UpdateDraftOrderRequest> validator)
     {
         _products = products;
         _orders = orders;
         _persistence = persistence;
+        _concurrency = concurrency;
         _pricingCalculator = pricingCalculator;
         _validator = validator;
     }
 
-    public async Task<OrderResponse> Handle(Guid id, UpdateDraftOrderRequest request, CancellationToken cancellationToken = default)
+    public async Task<OrderResponse> Handle(
+        Guid id,
+        UpdateDraftOrderRequest request,
+        string? ifMatchToken = null,
+        CancellationToken cancellationToken = default)
     {
         await _validator.ValidateAndThrowAsync(request, cancellationToken);
 
@@ -143,6 +153,12 @@ public sealed class UpdateDraftOrder
         if (!order.IsEditable)
         {
             throw new ConflictException("Only draft orders can be edited.");
+        }
+
+        var expected = !string.IsNullOrWhiteSpace(ifMatchToken) ? ifMatchToken : request.ConcurrencyToken;
+        if (!string.IsNullOrWhiteSpace(expected))
+        {
+            _concurrency.SetExpectedToken(order, expected);
         }
 
         var ids = request.Items.Select(item => item.ProductId).Distinct().ToList();
@@ -175,17 +191,19 @@ public sealed class UpdateDraftOrder
 
         order.RecalculatePricing(_pricingCalculator);
         await _persistence.SaveChangesAsync(cancellationToken);
-        return order.ToResponse();
+        return order.ToResponse(_concurrency.GetToken(order));
     }
 }
 
 public sealed class GetOrder
 {
     private readonly IOrderStore _orders;
+    private readonly IConcurrencyTokenService _concurrency;
 
-    public GetOrder(IOrderStore orders)
+    public GetOrder(IOrderStore orders, IConcurrencyTokenService concurrency)
     {
         _orders = orders;
+        _concurrency = concurrency;
     }
 
     public async Task<OrderResponse> Handle(Guid id, CancellationToken cancellationToken = default)
@@ -193,7 +211,7 @@ public sealed class GetOrder
         var order = await _orders.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Order '{id}' was not found.");
 
-        return order.ToResponse();
+        return order.ToResponse(_concurrency.GetToken(order));
     }
 }
 
@@ -206,12 +224,10 @@ public sealed class ListOrders
         _orders = orders;
     }
 
-    public async Task<PagedResult<OrderResponse>> Handle(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<OrderResponse>> Handle(OrderListQuery query, CancellationToken cancellationToken = default)
     {
-        page = page < 1 ? 1 : page;
-        pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
-
-        var result = await _orders.ListAsync(page, pageSize, cancellationToken);
+        var (page, pageSize) = Paging.Normalize(query.Page, query.PageSize);
+        var result = await _orders.ListAsync(query with { Page = page, PageSize = pageSize }, cancellationToken);
         return new PagedResult<OrderResponse>(
             result.Items.Select(item => item.ToResponse()).ToList(),
             result.Page,

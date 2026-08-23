@@ -8,15 +8,18 @@ public sealed class Login
 {
     private readonly IIdentityService _identityService;
     private readonly ITokenService _tokenService;
+    private readonly IRefreshTokenService _refreshTokenService;
     private readonly IValidator<LoginRequest> _validator;
 
     public Login(
         IIdentityService identityService,
         ITokenService tokenService,
+        IRefreshTokenService refreshTokenService,
         IValidator<LoginRequest> validator)
     {
         _identityService = identityService;
         _tokenService = tokenService;
+        _refreshTokenService = refreshTokenService;
         _validator = validator;
     }
 
@@ -37,10 +40,68 @@ public sealed class Login
             throw new AuthenticationFailedException(invalidMessage);
         }
 
-        var token = _tokenService.CreateAccessToken(user);
+        var access = _tokenService.CreateAccessToken(user);
+        var refresh = await _refreshTokenService.IssueAsync(user.Id, cancellationToken);
         return new LoginResponse(
-            token.Value,
-            token.ExpiresAt,
+            access.Value,
+            access.ExpiresAt,
+            refresh.Token,
+            refresh.ExpiresAt,
             new UserResponse(user.Id, user.Email, user.DisplayName, user.Roles));
+    }
+}
+
+public sealed class RefreshAccessToken
+{
+    private readonly IRefreshTokenService _refreshTokenService;
+    private readonly ITokenService _tokenService;
+    private readonly IValidator<RefreshTokenRequest> _validator;
+
+    public RefreshAccessToken(
+        IRefreshTokenService refreshTokenService,
+        ITokenService tokenService,
+        IValidator<RefreshTokenRequest> validator)
+    {
+        _refreshTokenService = refreshTokenService;
+        _tokenService = tokenService;
+        _validator = validator;
+    }
+
+    public async Task<LoginResponse> Handle(RefreshTokenRequest request, CancellationToken cancellationToken = default)
+    {
+        await _validator.ValidateAndThrowAsync(request, cancellationToken);
+
+        var rotated = await _refreshTokenService.RotateAsync(request.RefreshToken, cancellationToken);
+        if (rotated is null)
+        {
+            throw new AuthenticationFailedException("Invalid or expired refresh token.");
+        }
+
+        var (user, refresh) = rotated.Value;
+        var access = _tokenService.CreateAccessToken(user);
+        return new LoginResponse(
+            access.Value,
+            access.ExpiresAt,
+            refresh.Token,
+            refresh.ExpiresAt,
+            new UserResponse(user.Id, user.Email, user.DisplayName, user.Roles));
+    }
+}
+
+public sealed class Logout
+{
+    private readonly IRefreshTokenService _refreshTokenService;
+    private readonly IValidator<RefreshTokenRequest> _validator;
+
+    public Logout(IRefreshTokenService refreshTokenService, IValidator<RefreshTokenRequest> validator)
+    {
+        _refreshTokenService = refreshTokenService;
+        _validator = validator;
+    }
+
+    public async Task Handle(RefreshTokenRequest request, CancellationToken cancellationToken = default)
+    {
+        await _validator.ValidateAndThrowAsync(request, cancellationToken);
+        await _refreshTokenService.RevokeAsync(request.RefreshToken, cancellationToken);
     }
 }

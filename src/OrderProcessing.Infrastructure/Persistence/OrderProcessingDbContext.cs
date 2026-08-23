@@ -6,6 +6,7 @@ using OrderProcessing.Domain.Inventory;
 using OrderProcessing.Domain.Orders;
 using OrderProcessing.Domain.Products;
 using OrderProcessing.Infrastructure.Identity;
+using OrderProcessing.Infrastructure.Messaging;
 
 namespace OrderProcessing.Infrastructure.Persistence;
 
@@ -29,6 +30,12 @@ public sealed class OrderProcessingDbContext : IdentityDbContext<ApplicationUser
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
     public DbSet<OrderAuditEvent> OrderAuditEvents => Set<OrderAuditEvent>();
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

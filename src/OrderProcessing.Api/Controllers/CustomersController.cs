@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OrderProcessing.Application.Abstractions;
 using OrderProcessing.Application.Common;
 using OrderProcessing.Application.Customers;
 
@@ -27,14 +28,16 @@ public sealed class CustomersController : ControllerBase
         _listCustomers = listCustomers;
     }
 
+    /// <summary>
+    /// Lists customers. Filter with search (name/email), status, and segment.
+    /// </summary>
     [HttpGet]
     [Authorize(Policy = Policies.CustomersRead)]
     [ProducesResponseType(typeof(PagedResult<CustomerResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<CustomerResponse>>> List(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20,
+        [FromQuery] CustomerListQuery query,
         CancellationToken cancellationToken = default) =>
-        Ok(await _listCustomers.Handle(page, pageSize, cancellationToken));
+        Ok(await _listCustomers.Handle(query, cancellationToken));
 
     [HttpGet("{id:guid}")]
     [Authorize(Policy = Policies.CustomersRead)]

@@ -115,12 +115,10 @@ public sealed class ListCustomers
         _customers = customers;
     }
 
-    public Task<PagedResult<CustomerResponse>> Handle(int page, int pageSize, CancellationToken cancellationToken = default)
+    public Task<PagedResult<CustomerResponse>> Handle(CustomerListQuery query, CancellationToken cancellationToken = default)
     {
-        page = page < 1 ? 1 : page;
-        pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
-
-        return Map(_customers.ListAsync(page, pageSize, cancellationToken));
+        var (page, pageSize) = Paging.Normalize(query.Page, query.PageSize);
+        return Map(_customers.ListAsync(query with { Page = page, PageSize = pageSize }, cancellationToken));
     }
 
     private static async Task<PagedResult<CustomerResponse>> Map(Task<PagedResult<Customer>> source)

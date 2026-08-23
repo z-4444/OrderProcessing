@@ -83,6 +83,7 @@ TestResults/
 coverage/
 *.coverage
 *.coveragexml
+*.trx
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
@@ -118,6 +119,8 @@ PublishProfiles/
 .env
 .env.*
 !.env.example
+src/OrderProcessing.Api/appsettings.Development.json
+OrderProcessing/appsettings.Development.json
 appsettings.*.local.json
 secrets.json
 **/appsettings.Development.local.json
@@ -146,6 +149,13 @@ dist/
 
 ## Docker local overrides
 docker-compose.override.yml
+
+## Local databases and container bind mounts
+*.sqlite
+*.sqlite3
+*.db-journal
+docker-data/
+sqlserver-data/
 
 ## Cursor / local tooling temp files
 .graphify_*

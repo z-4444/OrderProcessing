@@ -25,6 +25,7 @@ public sealed class AuthApiTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.False(string.IsNullOrWhiteSpace(body?.AccessToken));
+        Assert.False(string.IsNullOrWhiteSpace(body?.RefreshToken));
         Assert.Contains("Admin", body!.User.Roles);
     }
 

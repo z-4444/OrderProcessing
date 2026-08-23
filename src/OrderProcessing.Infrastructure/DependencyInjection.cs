@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderProcessing.Application.Abstractions;
 using OrderProcessing.Infrastructure.Identity;
+using OrderProcessing.Infrastructure.Messaging;
 using OrderProcessing.Infrastructure.Persistence;
 
 namespace OrderProcessing.Infrastructure;
@@ -49,16 +50,36 @@ public static class DependencyInjection
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<SeedAdminOptions>(configuration.GetSection(SeedAdminOptions.SectionName));
+        services.Configure<MessagingOptions>(configuration.GetSection(MessagingOptions.SectionName));
 
         services.AddScoped<IApplicationPersistence, EfApplicationPersistence>();
+        services.AddScoped<IConcurrencyTokenService, EfConcurrencyTokenService>();
         services.AddScoped<ICustomerStore, EfCustomerStore>();
         services.AddScoped<IProductStore, EfProductStore>();
         services.AddScoped<IOrderStore, EfOrderStore>();
+        services.AddScoped<IInventoryStore, EfInventoryStore>();
+        services.AddScoped<IOrderAuditStore, EfOrderAuditStore>();
+        services.AddScoped<IOutboxStore, EfOutboxStore>();
         services.AddScoped<IOrderNumberGenerator, EfOrderNumberGenerator>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddSingleton<ITokenService, JwtTokenService>();
         services.AddScoped<IdentityDataSeeder>();
         services.AddScoped<DevelopmentDataSeeder>();
+
+        var messaging = configuration.GetSection(MessagingOptions.SectionName).Get<MessagingOptions>() ?? new MessagingOptions();
+        if (messaging.Enabled)
+        {
+            services.AddSingleton<IEventBusPublisher, RabbitMqEventBusPublisher>();
+            services.AddSingleton<IOrderEventHandler, OrderEventLoggingHandler>();
+            services.AddHostedService<OutboxPublisherHostedService>();
+            services.AddHostedService<OrderEventConsumerHostedService>();
+        }
+        else
+        {
+            services.AddSingleton<IEventBusPublisher, NoOpEventBusPublisher>();
+        }
+
         return services;
     }
 }
