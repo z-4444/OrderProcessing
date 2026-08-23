@@ -53,6 +53,7 @@ public static class DependencyInjection
         services.Configure<MessagingOptions>(configuration.GetSection(MessagingOptions.SectionName));
 
         services.AddScoped<IApplicationPersistence, EfApplicationPersistence>();
+        services.AddScoped<IConcurrencyTokenService, EfConcurrencyTokenService>();
         services.AddScoped<ICustomerStore, EfCustomerStore>();
         services.AddScoped<IProductStore, EfProductStore>();
         services.AddScoped<IOrderStore, EfOrderStore>();
@@ -70,6 +71,7 @@ public static class DependencyInjection
         if (messaging.Enabled)
         {
             services.AddSingleton<IEventBusPublisher, RabbitMqEventBusPublisher>();
+            services.AddSingleton<IOrderEventHandler, OrderEventLoggingHandler>();
             services.AddHostedService<OutboxPublisherHostedService>();
             services.AddHostedService<OrderEventConsumerHostedService>();
         }

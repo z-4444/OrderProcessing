@@ -69,28 +69,34 @@ internal sealed class OrderEventConsumerHostedService : BackgroundService
     {
         var messageId = Guid.TryParse(args.BasicProperties.MessageId, out var id) ? id : Guid.Empty;
         var eventType = args.BasicProperties.Type ?? "unknown";
+        var correlationId = args.BasicProperties.CorrelationId;
         var payload = Encoding.UTF8.GetString(args.Body.ToArray());
 
         try
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<OrderProcessingDbContext>();
+            var handler = scope.ServiceProvider.GetRequiredService<IOrderEventHandler>();
 
             if (messageId != Guid.Empty)
             {
                 var alreadyProcessed = await db.ProcessedMessages.AnyAsync(message => message.MessageId == messageId);
                 if (alreadyProcessed)
                 {
+                    _logger.LogDebug(
+                        "Skipping duplicate event {EventType} message {MessageId}",
+                        eventType,
+                        messageId);
                     _channel?.BasicAck(args.DeliveryTag, false);
                     return;
                 }
             }
 
-            _logger.LogInformation(
-                "Consumed event {EventType} message {MessageId}: {Payload}",
+            await handler.HandleAsync(
                 eventType,
-                messageId,
-                payload);
+                payload,
+                messageId == Guid.Empty ? null : messageId,
+                correlationId);
 
             if (messageId != Guid.Empty)
             {

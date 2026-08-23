@@ -1,8 +1,10 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using OrderProcessing.Application.Abstractions;
 using OrderProcessing.Application.Auth;
 using OrderProcessing.Application.Customers;
 using OrderProcessing.Application.Inventory;
+using OrderProcessing.Application.Observability;
 using OrderProcessing.Application.Orders;
 using OrderProcessing.Application.Products;
 using OrderProcessing.Domain.Pricing;
@@ -14,6 +16,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+        services.AddScoped<ICorrelationContext, CorrelationContext>();
         services.AddSingleton<ICustomerDiscountPolicy, LoyalCustomerDiscountPolicy>();
         services.AddSingleton<OrderPricingCalculator>();
 

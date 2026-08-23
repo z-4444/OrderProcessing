@@ -66,11 +66,20 @@ internal sealed class OutboxPublisherHostedService : BackgroundService
             {
                 await _publisher.PublishAsync(message, cancellationToken);
                 message.MarkPublished(DateTimeOffset.UtcNow);
+                _logger.LogInformation(
+                    "Published outbox message {MessageId} ({EventType}) with correlation {CorrelationId}",
+                    message.Id,
+                    message.EventType,
+                    message.CorrelationId);
             }
             catch (Exception exception)
             {
-                message.MarkFailed(exception.Message);
-                _logger.LogWarning(exception, "Failed to publish outbox message {MessageId}", message.Id);
+                message.RecordPublishFailure(exception.Message, Math.Max(1, _options.MaxPublishAttempts));
+                _logger.LogWarning(
+                    exception,
+                    "Failed to publish outbox message {MessageId} (attempt {AttemptCount})",
+                    message.Id,
+                    message.AttemptCount);
             }
         }
 

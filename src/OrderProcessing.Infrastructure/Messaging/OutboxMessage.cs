@@ -76,14 +76,14 @@ public sealed class OutboxMessage
         LastError = null;
     }
 
-    public void MarkFailed(string error)
+    public void RecordPublishFailure(string error, int maxAttempts)
     {
-        Status = OutboxMessageStatus.Failed;
         AttemptCount += 1;
         LastError = error.Length > 2000 ? error[..2000] : error;
+        Status = AttemptCount >= maxAttempts
+            ? OutboxMessageStatus.Failed
+            : OutboxMessageStatus.Pending;
     }
-
-    public void IncrementAttempt() => AttemptCount += 1;
 }
 
 public sealed class ProcessedMessage

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OrderProcessing.Api.Concurrency;
 using OrderProcessing.Application.Abstractions;
 using OrderProcessing.Application.Common;
 using OrderProcessing.Application.Orders;
@@ -49,6 +50,9 @@ public sealed class OrdersController : ControllerBase
         _failOrder = failOrder;
     }
 
+    /// <summary>
+    /// Lists orders. Filter with status, customerId, orderNumber, from, to.
+    /// </summary>
     [HttpGet]
     [Authorize(Policy = Policies.OrdersRead)]
     [ProducesResponseType(typeof(PagedResult<OrderResponse>), StatusCodes.Status200OK)]
@@ -61,8 +65,12 @@ public sealed class OrdersController : ControllerBase
     [Authorize(Policy = Policies.OrdersRead)]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<OrderResponse>> Get(Guid id, CancellationToken cancellationToken) =>
-        Ok(await _getOrder.Handle(id, cancellationToken));
+    public async Task<ActionResult<OrderResponse>> Get(Guid id, CancellationToken cancellationToken)
+    {
+        var order = await _getOrder.Handle(id, cancellationToken);
+        ApplyETag(order.ConcurrencyToken);
+        return Ok(order);
+    }
 
     [HttpPost]
     [Authorize(Policy = Policies.OrdersCreate)]
@@ -72,9 +80,13 @@ public sealed class OrdersController : ControllerBase
         CancellationToken cancellationToken)
     {
         var created = await _createOrder.Handle(request, cancellationToken);
+        ApplyETag(created.ConcurrencyToken);
         return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 
+    /// <summary>
+    /// Updates a draft order. Send If-Match with the ETag from GET, or concurrencyToken in the body.
+    /// </summary>
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.OrdersEdit)]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
@@ -82,8 +94,17 @@ public sealed class OrdersController : ControllerBase
     public async Task<ActionResult<OrderResponse>> Update(
         Guid id,
         [FromBody] UpdateDraftOrderRequest request,
-        CancellationToken cancellationToken) =>
-        Ok(await _updateDraftOrder.Handle(id, request, cancellationToken));
+        [FromHeader(Name = "If-Match")] string? ifMatch,
+        CancellationToken cancellationToken)
+    {
+        var updated = await _updateDraftOrder.Handle(
+            id,
+            request,
+            ConcurrencyHeader.Resolve(ifMatch, request.ConcurrencyToken),
+            cancellationToken);
+        ApplyETag(updated.ConcurrencyToken);
+        return Ok(updated);
+    }
 
     [HttpPost("{id:guid}/submit")]
     [Authorize(Policy = Policies.OrdersSubmit)]
@@ -119,4 +140,12 @@ public sealed class OrdersController : ControllerBase
     [Authorize(Policy = Policies.OrdersFail)]
     public async Task<ActionResult<OrderResponse>> Fail(Guid id, CancellationToken cancellationToken) =>
         Ok(await _failOrder.Handle(id, cancellationToken));
+
+    private void ApplyETag(string? concurrencyToken)
+    {
+        if (!string.IsNullOrWhiteSpace(concurrencyToken))
+        {
+            Response.Headers.ETag = ConcurrencyHeader.ToETag(concurrencyToken);
+        }
+    }
 }

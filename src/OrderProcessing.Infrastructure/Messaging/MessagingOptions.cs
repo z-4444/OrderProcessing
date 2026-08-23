@@ -21,4 +21,6 @@ public sealed class MessagingOptions
     public int PublisherBatchSize { get; set; } = 20;
 
     public int PublisherIntervalSeconds { get; set; } = 2;
+
+    public int MaxPublishAttempts { get; set; } = 5;
 }

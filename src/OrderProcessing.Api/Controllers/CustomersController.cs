@@ -28,6 +28,9 @@ public sealed class CustomersController : ControllerBase
         _listCustomers = listCustomers;
     }
 
+    /// <summary>
+    /// Lists customers. Filter with search (name/email), status, and segment.
+    /// </summary>
     [HttpGet]
     [Authorize(Policy = Policies.CustomersRead)]
     [ProducesResponseType(typeof(PagedResult<CustomerResponse>), StatusCodes.Status200OK)]

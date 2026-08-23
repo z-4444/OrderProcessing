@@ -11,7 +11,13 @@ public sealed record CreateProductRequest(
     string Currency = "USD",
     int InitialQuantity = 0);
 
-public sealed record UpdateProductRequest(string Name, decimal UnitPrice, bool IsActive, string? Description, string Currency = "USD");
+public sealed record UpdateProductRequest(
+    string Name,
+    decimal UnitPrice,
+    bool IsActive,
+    string? Description,
+    string Currency = "USD",
+    string? ConcurrencyToken = null);
 
 public sealed record ProductResponse(
     Guid Id,
@@ -22,11 +28,12 @@ public sealed record ProductResponse(
     string Currency,
     bool IsActive,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    string? ConcurrencyToken = null);
 
 public static class ProductMappings
 {
-    public static ProductResponse ToResponse(this Product product) =>
+    public static ProductResponse ToResponse(this Product product, string? concurrencyToken = null) =>
         new(
             product.Id,
             product.Sku.Value,
@@ -36,7 +43,8 @@ public static class ProductMappings
             product.UnitPrice.Currency,
             product.IsActive,
             product.CreatedAt,
-            product.UpdatedAt);
+            product.UpdatedAt,
+            concurrencyToken);
 }
 
 public sealed class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>

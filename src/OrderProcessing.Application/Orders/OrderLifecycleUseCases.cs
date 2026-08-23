@@ -119,10 +119,10 @@ internal static class OrderLifecycleSupport
 
     public static void EnqueueOutbox(
         IOutboxStore outbox,
+        ICorrelationContext correlation,
         string eventType,
         Order order,
-        DateTimeOffset utcNow,
-        string? correlationId = null)
+        DateTimeOffset utcNow)
     {
         var payload = JsonSerializer.Serialize(new
         {
@@ -130,10 +130,11 @@ internal static class OrderLifecycleSupport
             orderNumber = order.OrderNumber.Value,
             customerId = order.CustomerId,
             status = order.Status.ToString(),
-            occurredAt = utcNow
+            occurredAt = utcNow,
+            correlationId = correlation.CorrelationId
         }, JsonOptions);
 
-        outbox.Add(eventType, payload, utcNow, correlationId);
+        outbox.Add(eventType, payload, utcNow, correlation.CorrelationId);
     }
 }
 
@@ -145,6 +146,7 @@ public sealed class SubmitOrder
     private readonly IApplicationPersistence _persistence;
     private readonly OrderPricingCalculator _pricing;
     private readonly ICurrentUser _currentUser;
+    private readonly ICorrelationContext _correlation;
 
     public SubmitOrder(
         IOrderStore orders,
@@ -152,7 +154,8 @@ public sealed class SubmitOrder
         IOutboxStore outbox,
         IApplicationPersistence persistence,
         OrderPricingCalculator pricing,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ICorrelationContext correlation)
     {
         _orders = orders;
         _audits = audits;
@@ -160,6 +163,7 @@ public sealed class SubmitOrder
         _persistence = persistence;
         _pricing = pricing;
         _currentUser = currentUser;
+        _correlation = correlation;
     }
 
     public async Task<OrderResponse> Handle(Guid id, CancellationToken cancellationToken = default)
@@ -177,7 +181,7 @@ public sealed class SubmitOrder
         }
 
         OrderLifecycleSupport.AddAudit(_audits, order, OrderAuditEventType.Submitted, "Order submitted.", _currentUser.UserId, utcNow);
-        OrderLifecycleSupport.EnqueueOutbox(_outbox, OutboxEventTypes.OrderSubmitted, order, utcNow);
+        OrderLifecycleSupport.EnqueueOutbox(_outbox, _correlation, OutboxEventTypes.OrderSubmitted, order, utcNow);
         await _persistence.SaveChangesAsync(cancellationToken);
         return order.ToResponse();
     }
@@ -192,6 +196,7 @@ public sealed class ConfirmOrder
     private readonly IApplicationPersistence _persistence;
     private readonly OrderPricingCalculator _pricing;
     private readonly ICurrentUser _currentUser;
+    private readonly ICorrelationContext _correlation;
 
     public ConfirmOrder(
         IOrderStore orders,
@@ -200,7 +205,8 @@ public sealed class ConfirmOrder
         IOutboxStore outbox,
         IApplicationPersistence persistence,
         OrderPricingCalculator pricing,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ICorrelationContext correlation)
     {
         _orders = orders;
         _inventory = inventory;
@@ -209,6 +215,7 @@ public sealed class ConfirmOrder
         _persistence = persistence;
         _pricing = pricing;
         _currentUser = currentUser;
+        _correlation = correlation;
     }
 
     public async Task<OrderResponse> Handle(Guid id, CancellationToken cancellationToken = default)
@@ -233,7 +240,7 @@ public sealed class ConfirmOrder
 
         OrderLifecycleSupport.AddAudit(_audits, order, OrderAuditEventType.Confirmed, "Order confirmed.", _currentUser.UserId, utcNow);
         OrderLifecycleSupport.AddAudit(_audits, order, OrderAuditEventType.InventoryReserved, "Inventory reserved.", _currentUser.UserId, utcNow);
-        OrderLifecycleSupport.EnqueueOutbox(_outbox, OutboxEventTypes.OrderConfirmed, order, utcNow);
+        OrderLifecycleSupport.EnqueueOutbox(_outbox, _correlation, OutboxEventTypes.OrderConfirmed, order, utcNow);
         await _persistence.SaveChangesAsync(cancellationToken);
         return order.ToResponse();
     }
@@ -246,19 +253,22 @@ public sealed class StartProcessingOrder
     private readonly IOutboxStore _outbox;
     private readonly IApplicationPersistence _persistence;
     private readonly ICurrentUser _currentUser;
+    private readonly ICorrelationContext _correlation;
 
     public StartProcessingOrder(
         IOrderStore orders,
         IOrderAuditStore audits,
         IOutboxStore outbox,
         IApplicationPersistence persistence,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ICorrelationContext correlation)
     {
         _orders = orders;
         _audits = audits;
         _outbox = outbox;
         _persistence = persistence;
         _currentUser = currentUser;
+        _correlation = correlation;
     }
 
     public async Task<OrderResponse> Handle(Guid id, CancellationToken cancellationToken = default)
@@ -276,7 +286,7 @@ public sealed class StartProcessingOrder
         }
 
         OrderLifecycleSupport.AddAudit(_audits, order, OrderAuditEventType.ProcessingStarted, "Order processing started.", _currentUser.UserId, utcNow);
-        OrderLifecycleSupport.EnqueueOutbox(_outbox, OutboxEventTypes.OrderProcessingStarted, order, utcNow);
+        OrderLifecycleSupport.EnqueueOutbox(_outbox, _correlation, OutboxEventTypes.OrderProcessingStarted, order, utcNow);
         await _persistence.SaveChangesAsync(cancellationToken);
         return order.ToResponse();
     }
@@ -290,6 +300,7 @@ public sealed class ShipOrder
     private readonly IOutboxStore _outbox;
     private readonly IApplicationPersistence _persistence;
     private readonly ICurrentUser _currentUser;
+    private readonly ICorrelationContext _correlation;
 
     public ShipOrder(
         IOrderStore orders,
@@ -297,7 +308,8 @@ public sealed class ShipOrder
         IOrderAuditStore audits,
         IOutboxStore outbox,
         IApplicationPersistence persistence,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ICorrelationContext correlation)
     {
         _orders = orders;
         _inventory = inventory;
@@ -305,6 +317,7 @@ public sealed class ShipOrder
         _outbox = outbox;
         _persistence = persistence;
         _currentUser = currentUser;
+        _correlation = correlation;
     }
 
     public async Task<OrderResponse> Handle(Guid id, CancellationToken cancellationToken = default)
@@ -328,7 +341,7 @@ public sealed class ShipOrder
         }
 
         OrderLifecycleSupport.AddAudit(_audits, order, OrderAuditEventType.Shipped, "Order shipped.", _currentUser.UserId, utcNow);
-        OrderLifecycleSupport.EnqueueOutbox(_outbox, OutboxEventTypes.OrderShipped, order, utcNow);
+        OrderLifecycleSupport.EnqueueOutbox(_outbox, _correlation, OutboxEventTypes.OrderShipped, order, utcNow);
         await _persistence.SaveChangesAsync(cancellationToken);
         return order.ToResponse();
     }
@@ -341,19 +354,22 @@ public sealed class CompleteOrder
     private readonly IOutboxStore _outbox;
     private readonly IApplicationPersistence _persistence;
     private readonly ICurrentUser _currentUser;
+    private readonly ICorrelationContext _correlation;
 
     public CompleteOrder(
         IOrderStore orders,
         IOrderAuditStore audits,
         IOutboxStore outbox,
         IApplicationPersistence persistence,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ICorrelationContext correlation)
     {
         _orders = orders;
         _audits = audits;
         _outbox = outbox;
         _persistence = persistence;
         _currentUser = currentUser;
+        _correlation = correlation;
     }
 
     public async Task<OrderResponse> Handle(Guid id, CancellationToken cancellationToken = default)
@@ -371,7 +387,7 @@ public sealed class CompleteOrder
         }
 
         OrderLifecycleSupport.AddAudit(_audits, order, OrderAuditEventType.Completed, "Order completed.", _currentUser.UserId, utcNow);
-        OrderLifecycleSupport.EnqueueOutbox(_outbox, OutboxEventTypes.OrderCompleted, order, utcNow);
+        OrderLifecycleSupport.EnqueueOutbox(_outbox, _correlation, OutboxEventTypes.OrderCompleted, order, utcNow);
         await _persistence.SaveChangesAsync(cancellationToken);
         return order.ToResponse();
     }
@@ -385,6 +401,7 @@ public sealed class CancelOrder
     private readonly IOutboxStore _outbox;
     private readonly IApplicationPersistence _persistence;
     private readonly ICurrentUser _currentUser;
+    private readonly ICorrelationContext _correlation;
 
     public CancelOrder(
         IOrderStore orders,
@@ -392,7 +409,8 @@ public sealed class CancelOrder
         IOrderAuditStore audits,
         IOutboxStore outbox,
         IApplicationPersistence persistence,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ICorrelationContext correlation)
     {
         _orders = orders;
         _inventory = inventory;
@@ -400,6 +418,7 @@ public sealed class CancelOrder
         _outbox = outbox;
         _persistence = persistence;
         _currentUser = currentUser;
+        _correlation = correlation;
     }
 
     public async Task<OrderResponse> Handle(Guid id, CancellationToken cancellationToken = default)
@@ -425,7 +444,7 @@ public sealed class CancelOrder
         }
 
         OrderLifecycleSupport.AddAudit(_audits, order, OrderAuditEventType.Cancelled, "Order cancelled.", _currentUser.UserId, utcNow);
-        OrderLifecycleSupport.EnqueueOutbox(_outbox, OutboxEventTypes.OrderCancelled, order, utcNow);
+        OrderLifecycleSupport.EnqueueOutbox(_outbox, _correlation, OutboxEventTypes.OrderCancelled, order, utcNow);
         await _persistence.SaveChangesAsync(cancellationToken);
         return order.ToResponse();
     }
@@ -439,6 +458,7 @@ public sealed class FailOrder
     private readonly IOutboxStore _outbox;
     private readonly IApplicationPersistence _persistence;
     private readonly ICurrentUser _currentUser;
+    private readonly ICorrelationContext _correlation;
 
     public FailOrder(
         IOrderStore orders,
@@ -446,7 +466,8 @@ public sealed class FailOrder
         IOrderAuditStore audits,
         IOutboxStore outbox,
         IApplicationPersistence persistence,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ICorrelationContext correlation)
     {
         _orders = orders;
         _inventory = inventory;
@@ -454,6 +475,7 @@ public sealed class FailOrder
         _outbox = outbox;
         _persistence = persistence;
         _currentUser = currentUser;
+        _correlation = correlation;
     }
 
     public async Task<OrderResponse> Handle(Guid id, CancellationToken cancellationToken = default)
@@ -479,7 +501,7 @@ public sealed class FailOrder
         }
 
         OrderLifecycleSupport.AddAudit(_audits, order, OrderAuditEventType.Failed, "Order failed.", _currentUser.UserId, utcNow);
-        OrderLifecycleSupport.EnqueueOutbox(_outbox, OutboxEventTypes.OrderFailed, order, utcNow);
+        OrderLifecycleSupport.EnqueueOutbox(_outbox, _correlation, OutboxEventTypes.OrderFailed, order, utcNow);
         await _persistence.SaveChangesAsync(cancellationToken);
         return order.ToResponse();
     }

@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 using OrderProcessing.Api.Authorization;
+using OrderProcessing.Api.Health;
 using OrderProcessing.Api.Middleware;
 using OrderProcessing.Application;
 using OrderProcessing.Application.Common;
@@ -10,6 +12,7 @@ using OrderProcessing.Infrastructure.Identity;
 using OrderProcessing.Infrastructure.Messaging;
 using OrderProcessing.Infrastructure.Persistence;
 using Serilog;
+using Serilog.Events;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -24,6 +27,7 @@ try
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
         .Enrich.WithProperty("Application", "OrderProcessing.Api")
+        .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
         .WriteTo.Console());
 
     builder.Services.AddOptions<PricingOptions>()
@@ -93,11 +97,29 @@ try
 
     app.UseExceptionHandler();
     app.UseMiddleware<CorrelationIdMiddleware>();
-    app.UseSerilogRequestLogging();
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.GetLevel = (httpContext, _, exception) =>
+        {
+            if (httpContext.Request.Path.StartsWithSegments("/health"))
+            {
+                return LogEventLevel.Debug;
+            }
+
+            return exception is not null ? LogEventLevel.Error : LogEventLevel.Information;
+        };
+
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+            diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+        };
+    });
     app.UseHttpsRedirection();
     app.UseCors("Frontend");
     app.UseAuthentication();
     app.UseAuthorization();
+    app.UseMiddleware<UserLoggingMiddleware>();
 
     if (app.Environment.IsDevelopment())
     {
@@ -106,15 +128,25 @@ try
     }
 
     app.MapControllers();
+
+    var healthOptions = new HealthCheckOptions
+    {
+        ResponseWriter = HealthCheckResponseWriter.WriteJsonAsync
+    };
+
     app.MapHealthChecks("/health/live", new HealthCheckOptions
     {
-        Predicate = _ => false
-    });
+        Predicate = _ => false,
+        ResponseWriter = HealthCheckResponseWriter.WriteJsonAsync
+    }).AllowAnonymous();
+
     app.MapHealthChecks("/health/ready", new HealthCheckOptions
     {
-        Predicate = check => check.Tags.Contains("ready")
-    });
-    app.MapHealthChecks("/health");
+        Predicate = check => check.Tags.Contains("ready"),
+        ResponseWriter = HealthCheckResponseWriter.WriteJsonAsync
+    }).AllowAnonymous();
+
+    app.MapHealthChecks("/health", healthOptions).AllowAnonymous();
 
     using (var scope = app.Services.CreateScope())
     {

@@ -7,7 +7,10 @@ public sealed record OrderItemRequest(Guid ProductId, int Quantity, decimal Line
 
 public sealed record CreateOrderRequest(Guid CustomerId, IReadOnlyList<OrderItemRequest> Items, string? Notes);
 
-public sealed record UpdateDraftOrderRequest(IReadOnlyList<OrderItemRequest> Items, string? Notes);
+public sealed record UpdateDraftOrderRequest(
+    IReadOnlyList<OrderItemRequest> Items,
+    string? Notes,
+    string? ConcurrencyToken = null);
 
 public sealed record OrderItemResponse(
     Guid Id,
@@ -35,11 +38,12 @@ public sealed record OrderResponse(
     string? Notes,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
-    IReadOnlyList<OrderItemResponse> Items);
+    IReadOnlyList<OrderItemResponse> Items,
+    string? ConcurrencyToken = null);
 
 public static class OrderMappings
 {
-    public static OrderResponse ToResponse(this Order order) =>
+    public static OrderResponse ToResponse(this Order order, string? concurrencyToken = null) =>
         new(
             order.Id,
             order.OrderNumber.Value,
@@ -64,7 +68,8 @@ public static class OrderMappings
                 item.UnitPrice.Amount,
                 item.Discount.Amount,
                 item.LineTotal.Amount,
-                item.UnitPrice.Currency)).ToList());
+                item.UnitPrice.Currency)).ToList(),
+            concurrencyToken);
 }
 
 public sealed class CreateOrderRequestValidator : AbstractValidator<CreateOrderRequest>
